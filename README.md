@@ -37,7 +37,7 @@ You need to install the following packages, if they are not already installed:
 10. Grant permissions: Type `GRANT ALL PRIVILEGES ON DATABASE <database name> TO <username>;`
 11. Exit PostgreSQL: Type `\q`
 
-### Set Up Project Directory
+## Set Up Project Directory
 
 1. Type `mkdir django-expense` or any name for the directory you choose
 2. Change into the newly created directory: Type `cd django-expense`
@@ -65,7 +65,16 @@ You need to install the following packages, if they are not already installed:
 
    b. If using nano, type `CTRL + O` then `ENTER` to save, then `CTRL + X` to exit nano
 
-### Verify Django Development Server Working
+
+## Migrate Changes Into The Database and Create Superuser
+
+NOTE: Make sure your virtual environment is activated and you are in the project directory
+
+1. Type `python manage.py makemigrations`
+2. Type `python manage.py migrate`
+3. Create superuser: Type `python manage.py createsuperuser` and follow prompts
+
+## Run Django Project On Development Server
 
 1. Type `python manage.py runserver`
 
@@ -84,6 +93,10 @@ Quit the server with CONTROL-C.
 
 2. Open your browser and enter `http://127.0.0.1:8000/`
 
-You should see **The installion worked successfully! Congratulations!** in the middle of the screen.
+You should see **The installation worked successfully! Congratulations!** in the middle of the screen.
 
-### MORE TO COME SOON !!!
+## Stop Django Project
+
+1. Type `CTRL + C`
+
+NOTE: You can deactivate your virtual environment by typing `deactivate`, then `ENTER`
