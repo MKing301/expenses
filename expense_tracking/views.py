@@ -1,3 +1,7 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def expenses(request):
+    return render(request=request,
+                  template_name="expense_tracking/expense.html"
+                  )
