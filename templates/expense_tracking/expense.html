@@ -1,6 +1,34 @@
 {% extends 'expense_tracking/layout.html' %}
+{% load static %}
 {% block title %}Expenses{% endblock %}
 {% block body %}
-  <h1>Expenses Page</h1>
-  <h2>UNDER DEVELOPMENT</h2>
+  <main>
+    <legend class="border-bottom mb-4">
+        Expense List
+    </legend>
+    <table class="table table-bordered">
+      <thead class="alert-secondary">
+        <tr>
+          <th class="fit">Expense Date</th>
+          <th class="fit">Expense Type</th>
+          <th class="fit">Expense</th>
+          <th class="fit">Organization</th>
+          <th class="fit">Amount</th>
+          <th class="fit">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for expense in my_expenses %}
+          <tr>
+            <td class="fit">{{ expense.expense_date }}</td>
+            <td class="fit">{{ expense.expense_type }}</td>
+            <td class="fit">{{ expense.name }}</td>
+            <td class="fit">{{ expense.org }}</td>
+            <td class="fit">$ {{ expense.amount }}</td>
+            <td class="fit">{{ expense.notes }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
 {% endblock %}
