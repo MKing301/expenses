@@ -30,6 +30,15 @@
       integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
       crossorigin="anonymous"
     ></script>
+
+    {% load static %}
+
+    <!-- Favicon.ico -->
+	  <link rel= "shortcut icon" href= "{% static 'expense_tracking/images/favicon.ico' %}">
+
+    <!-- Local css -->
+    <link rel="stylesheet" href="{% static 'expense_tracking/css/styles.css' %}">
+
   <title>
     {% block title %} Base {% endblock %}
   </title>
