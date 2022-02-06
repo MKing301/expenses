@@ -74,6 +74,28 @@ NOTE: Make sure your virtual environment is activated and you are in the project
 2. Type `python manage.py migrate`
 3. Create superuser: Type `python manage.py createsuperuser` and follow prompts
 
+## Load Static files
+
+NOTE: Make sure your virtual environment is activated and you are in the project directory
+
+Type `python manage.py collectstatic`
+
+You will see something similar to the following:
+
+```
+You have requested to collect static files at the destination
+location as specified in your settings.
+
+This will overwrite existing files!
+Are you sure you want to do this?
+
+Type 'yes' to continue, or 'no' to cancel:
+```
+
+Type `yes` then `ENTER`
+
+1 static file copied to 'path/to/static/root/dir', 129 unmodified.
+
 ## Run Django Project On Development Server
 
 1. Type `python manage.py runserver`
