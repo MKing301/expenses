@@ -1,0 +1,9 @@
+body {
+    min-width: 100%;
+    min-height: 100%;
+}
+
+legend {
+    font-weight: bold;
+    color: rgb(21, 10, 173);
+}
