@@ -1,5 +1,6 @@
-from django.shortcuts import render
-from .models import Expense
+from django.shortcuts import render, redirect
+from .models import Expense, ExpenseType
+from .forms import ExpenseForm
 
 
 def expenses(request):
@@ -10,3 +11,35 @@ def expenses(request):
                       'my_expenses': my_expenses
                   }
                   )
+
+
+def add_expense(request):
+
+    expense_types = ExpenseType.objects.order_by('name')
+
+    if request.method == "POST":
+        form = ExpenseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('expense_tracking:expenses')
+
+        else:
+            return render(
+                request=request,
+                template_name="expense_tracking/add_expense.html",
+                context={
+                    'form': form,
+                    'expense_types': expense_types
+                }
+            )
+    else:
+        form = ExpenseForm()
+
+        return render(
+            request=request,
+            template_name="expense_tracking/add_expense.html",
+            context={
+                'form': form,
+                'expense_types': expense_types
+            }
+        )
