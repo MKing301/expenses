@@ -1,0 +1,105 @@
+{% extends 'expense_tracking/layout.html' %}
+{% block title %}Expenses{% endblock %}
+{% load static %}
+{% block body %}
+  <main>
+    <legend class="border-bottom mb-4">
+        Add Expense
+    </legend>
+    <div class="container">
+      <form method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            <div class="row">
+              <div class="col-sm-3">
+                <label for="expense_date">Expense Date</label>
+                <input
+                    type="date"
+                    class="form-control form-control-sm"
+                    data-date-format="mm/dd/yyyy"
+                    id="expense_date"
+                    name="expense_date"
+                    required="true"
+                />
+              </div>
+              <div class="col-sm-6">
+                <label for="expense_type">Expense Type</label>
+                <select
+                  class="form-control form-control-sm"
+                  id="expense_type"
+                  name="expense_type"
+                >
+                  <option
+                    selected="true"
+                    value='-1'
+                    disabled
+                  >
+                    --- Select a Expense Type ---
+                  </option>
+                  {% for expense_type in expense_types %}
+                    <option value="{{ expense_type.id }}">
+                      {{ expense_type.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-sm-3">
+                <label for="amount">Amount</label>
+                <input
+                  type="number"
+                  step='.01'
+                  class="form-control form-control-sm"
+                  id="amount"
+                  required="true"
+                  name="amount"
+                  placeholder="Enter Amount"
+                />
+              </div>
+          </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <label for="name">Expense</label>
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  id="name"
+                  name="name"
+                  required="true"
+                  placeholder="Enter Expense"
+                />
+              </div>
+              <div class="col-sm-6">
+                <label for="org">Organization</label>
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  id="org"
+                  name="org"
+                  required="true"
+                  placeholder="Enter Organization"
+                />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+              <label for="notes">Notes</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                id="notes"
+                name="notes"
+                placeholder="Enter Notes"
+              />
+            </div>
+            </div>
+          <br />
+          <div class="row">
+            <div class="col-sm-3">
+              <button class="btn btn-sm btn-primary" id="send_btn" type="submit">Add Expense</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+{% endblock %}
