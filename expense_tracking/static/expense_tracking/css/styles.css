@@ -3,7 +3,16 @@ body {
     min-height: 100%;
 }
 
+main {
+  margin-top: 75px;
+  margin-bottom: 50px;
+}
+
 legend {
     font-weight: bold;
     color: rgb(21, 10, 173);
+}
+
+.alert {
+    margin-top: 75px;
 }
