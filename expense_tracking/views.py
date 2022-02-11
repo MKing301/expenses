@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Expense, ExpenseType
 from .forms import ExpenseForm
+from django.contrib import messages
 
 
 def expenses(request):
@@ -21,6 +22,10 @@ def add_expense(request):
         form = ExpenseForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(
+                request,
+                'Expense added successfully.'
+            )
             return redirect('expense_tracking:expenses')
 
         else:
@@ -48,4 +53,9 @@ def add_expense(request):
 def delete_expense(request, id):
     expense_to_delete = Expense.objects.get(id=id)
     expense_to_delete.delete()
+    messages.success(
+        request,
+        f'''Expense named {expense_to_delete.name} dated
+        {expense_to_delete.expense_date} was successfully deleted!'''
+    )
     return redirect('expense_tracking:expenses')
