@@ -15,6 +15,7 @@
           <th class="fit">Organization</th>
           <th class="fit">Amount</th>
           <th class="fit">Notes</th>
+          <th class="fit"></th>
         </tr>
       </thead>
       <tbody>
@@ -26,9 +27,30 @@
             <td class="fit">{{ expense.org }}</td>
             <td class="fit">$ {{ expense.amount }}</td>
             <td class="fit">{{ expense.notes }}</td>
+            <td class="fit">
+              <a
+                id="conf_del"
+                href="{% url 'expense_tracking:delete_expense' expense.id %}"
+                class="btn btn-danger btn-sm"
+                onclick="return confirmDelete()"
+              >
+                Delete
+              </a>
+            </td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
+    <script>
+        function confirmDelete(){
+          var res = confirm('Are you sure you want to delete this record?');
+
+          if(res) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+    </script>
   </main>
 {% endblock %}
