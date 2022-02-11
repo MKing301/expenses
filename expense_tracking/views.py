@@ -43,3 +43,9 @@ def add_expense(request):
                 'expense_types': expense_types
             }
         )
+
+
+def delete_expense(request, id):
+    expense_to_delete = Expense.objects.get(id=id)
+    expense_to_delete.delete()
+    return redirect('expense_tracking:expenses')
