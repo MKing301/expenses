@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -26,14 +27,11 @@
       crossorigin="anonymous">
     </script>
 
-
-    {% load static %}
-
     <!-- Favicon.ico -->
 	  <link rel= "shortcut icon" href= "{% static 'expense_tracking/images/favicon.ico' %}">
 
     <!-- Local css -->
-    <link rel="stylesheet" href="{% static 'expense_tracking/css/styles.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'expense_tracking/css/styles.css' %}">
 
   <title>
     {% block title %} Base {% endblock %}
@@ -44,10 +42,20 @@
 
       <!-- Page Content -->
       {% include "expense_tracking/includes/_navbar.html" %}
+      {% include "expense_tracking/includes/_messages.html" %}
       {% block body %}
       {% endblock %}<!-- End Page Content -->
       {% include "expense_tracking/includes/_footer.html" %}
 
     </div> <!-- End container-fluid class-->
+
+    <script type="text/JavaScript">
+      setTimeout(function () {
+
+        // Closing the alert
+        $('.alert').hide(500);
+      }, 5000);
+    </script>
+
   </body>
 </html>
