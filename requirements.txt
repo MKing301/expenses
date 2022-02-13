@@ -1,3 +1,4 @@
 django
+django-recaptcha
 python-dotenv
 psycopg2-binary
