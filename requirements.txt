@@ -1,4 +1,5 @@
 django
 django-recaptcha
+django-widget-tweaks
 python-dotenv
 psycopg2-binary
