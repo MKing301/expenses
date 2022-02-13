@@ -9,6 +9,13 @@ from .signals import log_user_logout
 from django.contrib.auth.decorators import login_required
 
 
+def index(request):
+    return render(
+        request=request,
+        template_name="expense_tracking/index.html",
+    )
+
+
 def login_request(request):
 
     # Verify the user is not logged into the application
