@@ -1,6 +1,15 @@
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 from .models import Expense
 from django.core.exceptions import ValidationError
+from captcha.fields import ReCaptchaField
+
+
+class AuthenticationFormWithCaptchaField(AuthenticationForm):
+    captcha = ReCaptchaField(
+        public_key='your public key here',
+        private_key='your private key here',
+    )
 
 
 class ExpenseForm(forms.ModelForm):
