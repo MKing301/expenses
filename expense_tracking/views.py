@@ -3,16 +3,25 @@ from django.contrib.auth.models import User
 from .models import Expense, ExpenseType
 from .forms import ExpenseForm, AuthenticationFormWithCaptchaField
 from django.contrib.auth import (
-    login, authenticate)
+    login, logout, authenticate)
 from django.contrib import messages
+from .signals import log_user_logout
+from django.contrib.auth.decorators import login_required
 
 
 def login_request(request):
+
+    # Verify the user is not logged into the application
     if not request.user.is_authenticated:
+
+        # For user submitting the form
         if request.method == "POST":
             form = AuthenticationFormWithCaptchaField(
                 request, data=request.POST
             )
+
+            # If the form is valid, present user with a success alert
+            # and redirect the the expense list
             if form.is_valid():
                 username = form.cleaned_data.get('username')
                 password = form.cleaned_data.get('password')
@@ -24,17 +33,22 @@ def login_request(request):
                 )
                 return redirect("expense_tracking:expenses")
 
+            # Check if the users exist
             elif User.objects.filter(
                     username=form.cleaned_data.get('username')).exists():
                 user = User.objects.filter(
                     username=form.cleaned_data.get('username')).values()
+
+                # If the user's profile is inactive, alert the user to
+                # contact the admin
                 if(user[0]['is_active'] is False):
                     messages.info(
                         request,
                         "Contact the administrator to activate your account!"
                     )
-                    return redirect("expense_tracking:expenses")
+                    return redirect("expense_tracking:login_request")
 
+                # Present form to the user with any errors
                 else:
                     return render(
                         request=request,
@@ -42,12 +56,15 @@ def login_request(request):
                         context={"form": form}
                     )
 
+            # Present form to the user with any errors
             else:
                 return render(
                     request=request,
                     template_name="expense_tracking/login.html",
                     context={"form": form}
                 )
+
+        # When the form is NOT being submitted, present to form to the user
         else:
             form = AuthenticationFormWithCaptchaField()
             return render(
@@ -55,6 +72,9 @@ def login_request(request):
                 template_name="expense_tracking/login.html",
                 context={"form": form}
             )
+
+    # If the user is already logged into the application, provide alert
+    # to inform the user and redirect her/him to the expenses list
     else:
         messages.info(
             request,
@@ -64,6 +84,7 @@ def login_request(request):
         return redirect("expense_tracking:expenses")
 
 
+@login_required()
 def expenses(request):
     my_expenses = Expense.objects.order_by('-expense_date')
     return render(request=request,
@@ -74,6 +95,7 @@ def expenses(request):
                   )
 
 
+@login_required()
 def add_expense(request):
 
     expense_types = ExpenseType.objects.order_by('name')
@@ -110,6 +132,7 @@ def add_expense(request):
         )
 
 
+@login_required()
 def delete_expense(request, id):
     expense_to_delete = Expense.objects.get(id=id)
     expense_to_delete.delete()
@@ -119,3 +142,10 @@ def delete_expense(request, id):
         {expense_to_delete.expense_date} was successfully deleted!'''
     )
     return redirect('expense_tracking:expenses')
+
+
+@login_required()
+def logout_request(request):
+    logout(request)
+    log_user_logout()
+    return redirect("catalog:index")
