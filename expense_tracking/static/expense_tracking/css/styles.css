@@ -16,3 +16,9 @@ legend {
 .alert {
     margin-top: 75px;
 }
+
+.errorlist {
+  margin-top: 75px;
+  color: red;
+  font-weight: bold;
+}
