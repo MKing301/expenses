@@ -12,4 +12,5 @@ urlpatterns = [
         views.delete_expense,
         name='delete_expense'
     ),
+    path("login/", views.login_request, name="login_request"),
 ]
