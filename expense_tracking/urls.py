@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib.auth.views import LogoutView
 
 
 app_name = "expense_tracking"
@@ -13,4 +14,5 @@ urlpatterns = [
         name='delete_expense'
     ),
     path("login/", views.login_request, name="login_request"),
+    path("accounts/logout/", LogoutView.as_view(), name="logout"),
 ]
