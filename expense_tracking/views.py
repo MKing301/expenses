@@ -139,6 +139,42 @@ def add_expense(request):
         )
 
 
+@login_required
+def edit_expense(request, id):
+
+    # Obtain expense record to edit by id
+    expense_to_edit = Expense.objects.get(id=id)
+
+    # Obtain list of expense types in order by name, except the selected value
+    # by id from the form
+    expense_types = ExpenseType.objects.exclude(
+        id=expense_to_edit.expense_type.pk
+    ).order_by('name')
+
+    if request.method == "POST":
+        form = ExpenseForm(request.POST, instance=expense_to_edit)
+
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request,
+                'Your expense was updated successfully!'
+            )
+        return redirect('expense_tracking:expenses')
+
+    else:
+        form = ExpenseForm(instance=expense_to_edit)
+        return render(
+            request=request,
+            template_name='expense_tracking/edit_expense.html',
+            context={
+                'expense_types': expense_types,
+                'expense_to_edit': expense_to_edit,
+                'form': form
+            }
+        )
+
+
 @login_required()
 def delete_expense(request, id):
     expense_to_delete = Expense.objects.get(id=id)
