@@ -22,3 +22,10 @@ legend {
   color: red;
   font-weight: bold;
 }
+
+.table td.fit,
+.table th.fit {
+  white-space:nowrap;
+  width: 1%;
+  text-align: center;
+}
