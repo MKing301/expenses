@@ -29,3 +29,7 @@ legend {
   width: 1%;
   text-align: center;
 }
+
+.pagination {
+    justify-content:center;
+}
