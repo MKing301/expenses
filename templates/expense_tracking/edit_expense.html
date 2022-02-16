@@ -1,0 +1,119 @@
+{% extends 'expense_tracking/layout.html' %}
+{% load static %}
+{% block title %}Expenses{% endblock %}
+{% block body %}
+  <main>
+    <legend class="border-bottom mb-4">
+        Edit Expense
+    </legend>
+    <div class="container">
+      <form method="POST">
+          {% csrf_token %}
+          {% if expense_to_edit %}
+          <div class="form-group">
+            <div class="row">
+              <div class="col-sm-3">
+                <label for="expense_date">Expense Date</label>
+                <input
+                    type="date"
+                    class="form-control form-control-sm"
+                    data-date-format="mm/dd/yyyy"
+                    id="expense_date"
+                    name="expense_date"
+                    value='{{ expense_to_edit.expense_date }}'
+                />
+              </div>
+              <div class="col-sm-6">
+                <label for="expense_type">Expense Type</label>
+                <select
+                  class="form-control form-control-sm"
+                  id="expense_type"
+                  name="expense_type"
+                >
+                  <option
+                    selected="true"
+                    value='{{ expense_to_edit.expense_type.pk }}'
+                  >
+                    {{ expense_to_edit.expense_type }}
+                  </option>
+                  {% for expense_type in expense_types %}
+                    <option value="{{ expense_type.id }}">
+                      {{ expense_type.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-sm-3">
+                <label for="amount">Amount</label>
+                <input
+                  type="number"
+                  step='.01'
+                  class="form-control form-control-sm"
+                  id="amount"
+                  required="true"
+                  name="amount"
+                  value='{{ expense_to_edit.amount }}'
+                />
+              </div>
+          </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <label for="name">Expense</label>
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  id="name"
+                  name="name"
+                  required="true"
+                  value='{{ expense_to_edit.name }}'
+                />
+              </div>
+              <div class="col-sm-6">
+                <label for="org">Organization</label>
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  id="org"
+                  name="org"
+                  required="true"
+                  value='{{ expense_to_edit.org }}'
+                />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+              <label for="notes">Notes</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                id="notes"
+                name="notes"
+                value='{{ expense_to_edit.notes }}'
+              />
+            </div>
+            </div>
+          <br />
+          <div class="row">
+            <div class="col-sm-3">
+              <button
+                class="btn btn-sm btn-primary"
+                id="send_btn"
+                type="submit"
+                >
+                  Update
+              </button>
+              <button
+                onclick="javascript:history.back();"
+                class="btn btn-secondary btn-sm"
+                type="submit"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </form>
+    </div>
+  </main>
+{% endblock %}
