@@ -7,6 +7,7 @@ from django.contrib.auth import (
 from django.contrib import messages
 from .signals import log_user_logout
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 
 def index(request):
@@ -93,7 +94,15 @@ def login_request(request):
 
 @login_required()
 def expenses(request):
-    my_expenses = Expense.objects.order_by('-expense_date')
+
+    # Set up pagination
+    # Get 20 expenses per page, by expense date descending
+    p = Paginator(Expense.objects.order_by(
+        '-expense_date'
+    ), 20)
+    page = request.GET.get('page')
+    my_expenses = p.get_page(page)
+
     return render(request=request,
                   template_name="expense_tracking/expense.html",
                   context={
