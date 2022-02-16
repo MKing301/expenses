@@ -50,6 +50,42 @@
         {% endfor %}
       </tbody>
     </table>
+    <br />
+    <br />
+    <hr />
+    <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                {% if my_expenses.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">
+                        &laquo First
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ my_expenses.previous_page_number }}">
+                        Previous
+                    </a>
+                </li>
+               {% endif %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                        Page {{ my_expenses.number}} of {{my_expenses.paginator.num_pages}}
+                    </a>
+                </li>
+                {% if my_expenses.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ my_expenses.next_page_number }}">
+                        Next
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ my_expenses.paginator.num_pages }}">
+                        Last &raquo
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
     <script>
         function confirmDelete(){
           var res = confirm('Are you sure you want to delete this record?');
