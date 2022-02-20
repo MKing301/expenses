@@ -1,9 +1,11 @@
 {% extends 'expense_tracking/layout.html' %}
+{% load static %}
 {% block title %} Home {% endblock %}
 {% block body %}
-<main>
-  <legend class="border-bottom mb-4">
-     Landing Page (placeholder)
-  </legend>
-</main>
+<div
+  class="background-home"
+  id="outer-div"
+  style="background-image: url({% static 'expense_tracking/images/money-gc60b9a1ef_1280.png' %});"
+>
+</div>
 {% endblock %}
