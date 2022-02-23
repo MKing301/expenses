@@ -8,6 +8,13 @@ from django.contrib import messages
 from .signals import log_user_logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from rest_framework import viewsets
+from .serializers import ExpenseTypeSerializer
+
+
+class ExpenseTypeView(viewsets.ModelViewSet):
+    queryset = ExpenseType.objects.all()
+    serializer_class = ExpenseTypeSerializer
 
 
 def index(request):
