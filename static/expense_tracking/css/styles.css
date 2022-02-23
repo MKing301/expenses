@@ -23,6 +23,14 @@ legend {
     color: rgb(21, 10, 173);
 }
 
+label {
+    font-weight: bold;
+}
+
+.row {
+  margin-bottom: 20px;
+}
+
 .alert {
     margin-top: 75px;
 }
