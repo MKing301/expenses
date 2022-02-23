@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'expense_tracking.apps.ExpenseTrackingConfig',
     'widget_tweaks',
     'captcha',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
