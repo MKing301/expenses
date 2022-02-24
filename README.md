@@ -1,5 +1,8 @@
 # Expense Tracking Project
 
+This application is for expense tracking that allows for customized categories.
+The categories can be added from the admin console or using a Rest API.
+
 ## Set Up Machine
 I am working on a Linux machine with Ubuntu 20.04.
 Type ` lsb_release -a` to check your version.  My results are:
@@ -115,7 +118,14 @@ Quit the server with CONTROL-C.
 
 2. Open your browser and enter `http://127.0.0.1:8000/`
 
-You should see **The installation worked successfully! Congratulations!** in the middle of the screen.
+You will be directed to the landing page of the application.
+
+3. Type `http://127.0.0.1:8000/admin/` to access the admin console.
+
+4. Type `http://127.0.0.1:8000/api/v1/` to access API console.
+
+[NOTE: Use the credentials of the superuser you created to access the admin
+console and log into the API (if using the browser and not Postman).]
 
 ## Stop Django Project
 
