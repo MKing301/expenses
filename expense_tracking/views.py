@@ -13,7 +13,12 @@ from .serializers import ExpenseTypeSerializer
 
 
 class ExpenseTypeView(viewsets.ModelViewSet):
+    # Class for expense type view set
+
+    # Select all expense types
     queryset = ExpenseType.objects.all()
+
+    # Serialize class
     serializer_class = ExpenseTypeSerializer
 
 
