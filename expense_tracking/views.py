@@ -123,19 +123,25 @@ def expenses(request):
     # delete buttons)
 
     # Set up pagination
-    # Get 20 expenses per page, by expense date descending
+    # Get 50 expenses per page, by expense date descending
     p = Paginator(Expense.objects.order_by(
-        '-expense_date'
+        '-expense_date',
+        'expense_type__name',
+        'name',
+        'org'
     ), 50)
     page = request.GET.get('page')
     my_expenses = p.get_page(page)
+
+    distinct_expense_types = ExpenseType.objects.all()
 
     # Render expense table list 50 expense per page with page navigation at
     # the bottom of the page
     return render(request=request,
                   template_name="expense_tracking/expense.html",
                   context={
-                      'my_expenses': my_expenses
+                      'my_expenses': my_expenses,
+                      'distinct_expense_types': distinct_expense_types
                   }
                   )
 
@@ -246,6 +252,38 @@ def edit_expense(request, id):
                 'form': form
             }
         )
+
+
+@login_required
+def filter(request, id):
+
+    # Function requires user to be logged in and renders a table of expenses
+    # showing the date, type organization, amount and notes (with edit and
+    # delete buttons)
+
+    # Set up pagination
+    # Get 50 expenses per page, by expense date descending
+    p = Paginator(Expense.objects.filter(expense_type__id=id).order_by(
+        '-expense_date',
+        'expense_type__name',
+        'name',
+        'org'
+    ), 50)
+    page = request.GET.get('page')
+    my_expenses = p.get_page(page)
+
+    distinct_expense_types = ExpenseType.objects.all()
+
+    # Render a dropdown list of expense types to filter by, the expense table
+    # list with 50 expense per page with page navigation at the bottom of the
+    # page
+    return render(request=request,
+                  template_name="expense_tracking/expense.html",
+                  context={
+                      'my_expenses': my_expenses,
+                      'distinct_expense_types': distinct_expense_types
+                  }
+                  )
 
 
 @login_required()
