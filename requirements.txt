@@ -1,4 +1,5 @@
 django
+django-extensions
 django-recaptcha
 django-widget-tweaks
 djangorestframework
