@@ -20,7 +20,7 @@
                     data-date-format="mm/dd/yyyy"
                     id="expense_date"
                     name="expense_date"
-                    value='{{ expense_to_edit.expense_date }}'
+                    value='{{ expense_to_edit.expense_date|date:"Y-m-d" }}'
                 />
               </div>
               <div class="col-sm-6">
