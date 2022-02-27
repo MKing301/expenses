@@ -1,7 +1,12 @@
-from django.urls import path, include
+from django.urls import path, include, reverse_lazy
 from . import views
 from django.contrib.auth.views import LogoutView
 from rest_framework import routers
+from django.contrib.auth.views import (
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordResetConfirmView,
+    PasswordResetCompleteView)
 
 
 router = routers.DefaultRouter()
@@ -22,4 +27,33 @@ urlpatterns = [
     path("login/", views.login_request, name="login_request"),
     path("accounts/logout/", LogoutView.as_view(), name="logout"),
     path('api/v1/', include(router.urls)),
+    path(
+        "accounts/password-reset/",
+        PasswordResetView.as_view(
+            template_name='accounts/password_reset.html',
+            success_url=reverse_lazy('expense_tracking:password_reset_done')
+        ),
+        name='password_reset'
+    ),
+    path(
+        "accounts/password-reset/done/",
+        PasswordResetDoneView.as_view(
+            template_name='accounts/password_reset_done.html'
+        ),
+        name='password_reset_done'),
+    path(
+        "accounts/password-reset-confirm/<uidb64>/<token>/",
+        PasswordResetConfirmView.as_view(
+            template_name='accounts/password_reset_confirm.html',
+            success_url=reverse_lazy(
+                'expense_tracking:password_reset_complete'
+            )
+        ),
+        name='password_reset_confirm'),
+    path(
+        "accounts/password-reset-complete/",
+        PasswordResetCompleteView.as_view(
+            template_name='accounts/password_reset_complete.html'
+        ),
+        name='password_reset_complete'),
 ]
