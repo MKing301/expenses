@@ -6,6 +6,31 @@
     <legend class="border-bottom mb-4">
         Expense List
     </legend>
+    <div class="col-sm-3 select-update">
+        <select
+          class="form-control form-control-sm"
+          id="filter-dropdown"
+          name="filter-dropdown"
+          onchange="location=this.value;"
+        >
+          <option
+            selected="true"
+            value="-1"
+            disabled
+          >
+            --- Select an Expense Type to Filter By ---
+          </option>
+          <option value="{% url 'expense_tracking:expenses' %}">
+              All Expense Types
+          </option>
+          {% for distinct_expense_type in distinct_expense_types %}
+            <option value="{% url 'expense_tracking:filter' distinct_expense_type.id %}">
+                {{ distinct_expense_type.name }}
+            </option>
+          {% endfor %}
+        </select>
+    </div>
+    <br />
     <table class="table table-bordered">
       <thead class="alert-secondary">
         <tr>
