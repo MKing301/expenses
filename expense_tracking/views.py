@@ -109,6 +109,13 @@ def login_request(request):
         return redirect("expense_tracking:expenses")
 
 
+def password_reset_complete(request):
+    return render(
+        request=request,
+        template_name='accounts/password_reset_complete.html'
+    )
+
+
 @login_required()
 def expenses(request):
     # Function requires user to be logged in and renders a table of expenses
