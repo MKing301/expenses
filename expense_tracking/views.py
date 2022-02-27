@@ -126,11 +126,11 @@ def expenses(request):
     # Get 20 expenses per page, by expense date descending
     p = Paginator(Expense.objects.order_by(
         '-expense_date'
-    ), 20)
+    ), 50)
     page = request.GET.get('page')
     my_expenses = p.get_page(page)
 
-    # Render expense table list 20 expense per page with page navigation at
+    # Render expense table list 50 expense per page with page navigation at
     # the bottom of the page
     return render(request=request,
                   template_name="expense_tracking/expense.html",
