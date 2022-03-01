@@ -21,6 +21,11 @@ urlpatterns = [
     path('edit/<int:id>', views.edit_expense, name="edit_expense"),
     path("filter/<int:id>/", views.filter, name='filter'),
     path(
+        "data_2021/",
+        views.data_2021,
+        name='data_2021'
+    ),
+    path(
         "delete_expense/<int:id>",
         views.delete_expense,
         name='delete_expense'
