@@ -10,8 +10,58 @@
     <div class="collapse navbar-collapse" id="navbar">
         <ul class="navbar-nav ms-auto">
           {% if user.is_authenticated %}
-          <li class="nav-item"><a href="{% url 'expense_tracking:add_expense' %}" class="nav-link">Add Expense</a></li>
-          <li class="nav-item"><a href="{% url 'expense_tracking:expenses' %}" class="nav-link">Expenses</a></li>
+          <li class="nav-item">
+            <a
+              href="{% url 'expense_tracking:add_expense' %}"
+              class="nav-link"
+            >
+              Add Expense
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{% url 'expense_tracking:expenses' %}"
+              class="nav-link"
+            >
+              Expenses
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              id="dropdownMenuLink"
+              data-bs-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Data Visualization
+            </a>
+              <div class="dropdown-menu">
+                <a
+                  class="dropdown-item"
+                  id="data-2021"
+                  href="{% url 'expense_tracking:data_2021' %}"
+                >
+                  2021
+                </a>
+                <a
+                  class="dropdown-item"
+                  id="data-2020"
+                  href="#"
+                >
+                  2020
+                </a>
+                <a
+                  class="dropdown-item"
+                  id="data-2019"
+                  href="#"
+                >
+                  2019
+                </a>
+              </div>
+          </li>
           <li class="nav-item"><a href="{% url 'expense_tracking:logout' %}" class="nav-link">Logout</a></li>
           <li class="nav-item"><a href="#"  class="nav-link disabled">Logged in as {{ user.username}}</a></li>
           {% else %}
