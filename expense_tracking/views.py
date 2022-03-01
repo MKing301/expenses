@@ -1,3 +1,7 @@
+import pandas as pd
+import pandasql as ps
+import matplotlib.pyplot as plt
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from .models import Expense, ExpenseType
@@ -10,6 +14,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from rest_framework import viewsets
 from .serializers import ExpenseTypeSerializer
+from pretty_html_table import build_table
+from django.utils import timezone
 
 
 class ExpenseTypeView(viewsets.ModelViewSet):
@@ -318,3 +324,78 @@ def logout_request(request):
 
     # Redirect to the landing page
     return redirect("catalog:index")
+
+
+@login_required()
+def data_2021(request):
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.width", None)
+    pd.set_option("display.max_colwidth", None)
+
+    # Set float values to 2 decimal places
+    pd.options.display.float_format = "{:,.2f}".format
+
+    # Convert Excel file to dataframe
+    # df = pd.read_csv("/home/mfsd1809/Dev/General/expenses_app_load.csv")
+
+    df = pd.DataFrame(list(Expense.objects.all().values(
+        'expense_date', 'expense_type__name', 'name', 'org', 'amount')))
+    # Cast datetime to string
+    df["expense_date"] = pd.to_datetime(df["expense_date"], utc=True)
+    df["expense_date"] = df["expense_date"].dt.strftime('%Y')
+
+    # Convert amount column values to float
+    df["amount"] = pd.to_numeric(df["amount"], downcast="float")
+
+    df = df.loc[df["expense_date"] == '2021']
+
+    # # Sum of amount
+    # sum_df = df.groupby(
+    #     ["expense_date", "expense_type"]).agg({"amount": "sum"}
+    #                                           )
+    print(df)
+
+    query_2021 = '''
+    SELECT "expense_type__name" AS "Expense Type", sum("amount") AS "Amount"
+    FROM df
+    WHERE "expense_date" = 2021
+    GROUP BY "Expense Type"
+    ORDER BY "Amount" DESC
+    '''
+
+    sum_2021 = ps.sqldf(query_2021, locals())
+    # print(sum_2021)
+
+    sum_2021.plot(
+        x="Expense Type",
+        y="Amount",
+        kind="bar",
+        title="2021 Expense Overview",
+        legend=False
+    )
+    plt.xlabel("Expense Type")
+    plt.ylabel("Amount (in dollars)")
+    plt.tight_layout()
+    plt.savefig(
+        '/home/mfsd1809/Dev/FullStackWebDeveloper/GitRepos/django-expenses/'
+        'expenses/expense_tracking/static/expense_tracking/images/sum_2021.png'
+    )
+
+    dict = {
+        "sum_2021": build_table(sum_2021, 'blue_light')
+    }
+
+    messages.info(
+        request,
+        f'''Here are the latest results as of
+        {timezone.localtime(timezone.now()).strftime(
+        "%m-%d-%Y %I:%M:%S %p %Z"
+        )}.'''
+    )
+
+    return render(
+        request=request,
+        template_name='expense_tracking/data_2021.html',
+        context=dict
+    )
