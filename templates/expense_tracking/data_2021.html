@@ -1,0 +1,12 @@
+{% extends 'expense_tracking/layout.html' %}
+{% load static %}
+{% block title %}2021 Data{% endblock %}
+{%block body %}
+<main>
+    <legend class="border-bottom mb4">
+        Expense Data Overview 2021
+    </legend>
+    {{ sum_2021|safe }}
+    <img src="{% static 'expense_tracking/images/sum_2021.png' %}" />
+</main>
+{% endblock %}
