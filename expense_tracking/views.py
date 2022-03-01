@@ -328,19 +328,11 @@ def logout_request(request):
 
 @login_required()
 def data_2021(request):
-    pd.set_option("display.max_rows", None)
-    pd.set_option("display.max_columns", None)
-    pd.set_option("display.width", None)
-    pd.set_option("display.max_colwidth", None)
 
-    # Set float values to 2 decimal places
-    pd.options.display.float_format = "{:,.2f}".format
-
-    # Convert Excel file to dataframe
-    # df = pd.read_csv("/home/mfsd1809/Dev/General/expenses_app_load.csv")
-
+    # Create dataframe from all expense records for specified fields
     df = pd.DataFrame(list(Expense.objects.all().values(
         'expense_date', 'expense_type__name', 'name', 'org', 'amount')))
+
     # Cast datetime to string
     df["expense_date"] = pd.to_datetime(df["expense_date"], utc=True)
     df["expense_date"] = df["expense_date"].dt.strftime('%Y')
@@ -348,14 +340,10 @@ def data_2021(request):
     # Convert amount column values to float
     df["amount"] = pd.to_numeric(df["amount"], downcast="float")
 
+    # Select only records for the year 2011
     df = df.loc[df["expense_date"] == '2021']
 
-    # # Sum of amount
-    # sum_df = df.groupby(
-    #     ["expense_date", "expense_type"]).agg({"amount": "sum"}
-    #                                           )
-    print(df)
-
+    # Query for df grouped by expense type with sum of amounts for 2021
     query_2021 = '''
     SELECT "expense_type__name" AS "Expense Type", sum("amount") AS "Amount"
     FROM df
@@ -364,9 +352,10 @@ def data_2021(request):
     ORDER BY "Amount" DESC
     '''
 
+    # Execute query
     sum_2021 = ps.sqldf(query_2021, locals())
-    # print(sum_2021)
 
+    # Plot query resuts
     sum_2021.plot(
         x="Expense Type",
         y="Amount",
@@ -377,15 +366,19 @@ def data_2021(request):
     plt.xlabel("Expense Type")
     plt.ylabel("Amount (in dollars)")
     plt.tight_layout()
+
+    # Save figure
     plt.savefig(
         '/home/mfsd1809/Dev/FullStackWebDeveloper/GitRepos/django-expenses/'
         'expenses/expense_tracking/static/expense_tracking/images/sum_2021.png'
     )
 
+    # Set context to pass results table to template
     dict = {
         "sum_2021": build_table(sum_2021, 'blue_light')
     }
 
+    # Display info alert for results with current timestamp
     messages.info(
         request,
         f'''Here are the latest results as of
@@ -394,6 +387,7 @@ def data_2021(request):
         )}.'''
     )
 
+    # Render data visualization template for 2021 data
     return render(
         request=request,
         template_name='expense_tracking/data_2021.html',
