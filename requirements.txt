@@ -5,3 +5,6 @@ django-widget-tweaks
 djangorestframework
 python-dotenv
 psycopg2-binary
+pretty-html-table
+pandasql
+matplotlib
