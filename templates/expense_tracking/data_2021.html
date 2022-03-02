@@ -7,6 +7,8 @@
         Expense Data Overview 2021
     </legend>
     {{ sum_2021|safe }}
-    <img src="{% static 'expense_tracking/images/sum_2021.png' %}" />
+    {% autoescape off %}
+    {{ plt_div }}
+    {% endautoescape %}
 </main>
 {% endblock %}
