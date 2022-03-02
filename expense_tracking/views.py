@@ -1,5 +1,6 @@
 import pandas as pd
 import pandasql as ps
+import plotly.graph_objs as go
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -16,7 +17,6 @@ from .serializers import ExpenseTypeSerializer
 from pretty_html_table import build_table
 from django.utils import timezone
 from plotly.offline import plot
-from plotly.graph_objs import Bar
 
 
 # Set float values to 2 decimal places
@@ -360,14 +360,25 @@ def data_2021(request):
     # Execute query
     sum_2021 = ps.sqldf(query_2021, locals())
 
-    plt_div = plot(
-        [Bar(
-            x=sum_2021["Expense Type"],
-            y=sum_2021["Amount"],
-        )
-        ],
-        output_type='div'
+    trace = go.Bar(
+        x=sum_2021["Expense Type"],
+        y=sum_2021["Amount"]
     )
+
+    layout = go.Layout(
+        title={
+            "text": "<b>2021 Expenses</b>",
+        },
+        title_x=.5,
+        xaxis={
+            "title": "<b>Expense Type</b>"
+        },
+        yaxis={
+            "title": "<b>Amount (in dollars)</b>"
+        }
+    )
+    fig = go.Figure(data=trace, layout=layout)
+    plt_div = plot(fig, output_type='div')
 
     # Set context to pass results table to template
     dict = {
