@@ -2,11 +2,11 @@
 {% load static %}
 {% block title %}Expenses{% endblock %}
 {% block body %}
+<div class="container">
   <main>
     <legend class="border-bottom mb-4">
         Add Expense
     </legend>
-    <div class="container">
       <form method="POST">
           {% csrf_token %}
           <div class="form-group">
@@ -111,8 +111,8 @@
               </button>
             </div>
           </div>
-        </div>
       </form>
     </div>
   </main>
+  </div>
 {% endblock %}
