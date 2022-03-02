@@ -1,6 +1,5 @@
 import pandas as pd
 import pandasql as ps
-import matplotlib.pyplot as plt
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -16,6 +15,12 @@ from rest_framework import viewsets
 from .serializers import ExpenseTypeSerializer
 from pretty_html_table import build_table
 from django.utils import timezone
+from plotly.offline import plot
+from plotly.graph_objs import Bar
+
+
+# Set float values to 2 decimal places
+pd.options.display.float_format = "{:,.2f}".format
 
 
 class ExpenseTypeView(viewsets.ModelViewSet):
@@ -355,27 +360,19 @@ def data_2021(request):
     # Execute query
     sum_2021 = ps.sqldf(query_2021, locals())
 
-    # Plot query resuts
-    sum_2021.plot(
-        x="Expense Type",
-        y="Amount",
-        kind="bar",
-        title="2021 Expense Overview",
-        legend=False
-    )
-    plt.xlabel("Expense Type")
-    plt.ylabel("Amount (in dollars)")
-    plt.tight_layout()
-
-    # Save figure
-    plt.savefig(
-        '/home/mfsd1809/Dev/FullStackWebDeveloper/GitRepos/django-expenses/'
-        'expenses/expense_tracking/static/expense_tracking/images/sum_2021.png'
+    plt_div = plot(
+        [Bar(
+            x=sum_2021["Expense Type"],
+            y=sum_2021["Amount"],
+        )
+        ],
+        output_type='div'
     )
 
     # Set context to pass results table to template
     dict = {
-        "sum_2021": build_table(sum_2021, 'blue_light')
+        "sum_2021": build_table(sum_2021, 'blue_light'),
+        "plt_div": plt_div
     }
 
     # Display info alert for results with current timestamp
