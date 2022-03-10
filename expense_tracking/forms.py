@@ -6,6 +6,7 @@ from captcha.fields import ReCaptchaField
 
 
 class AuthenticationFormWithCaptchaField(AuthenticationForm):
+    # Class for authentication form, includingg recaptcha field
     captcha = ReCaptchaField(
         public_key='your public key here',
         private_key='your private key here',
@@ -13,6 +14,7 @@ class AuthenticationFormWithCaptchaField(AuthenticationForm):
 
 
 class ExpenseForm(forms.ModelForm):
+    # Class for expense form
 
     class Meta:
         model = Expense
@@ -26,36 +28,48 @@ class ExpenseForm(forms.ModelForm):
         )
 
     def clean_expense_date(self):
+        # Function to check if expense date is not populated
+
         expense_date = self.cleaned_data['expense_date']
         if expense_date is None:
             raise ValidationError('Please select an expense date.')
         return expense_date
 
     def clean_expense_type(self):
+        # Function to check if expense type is not selected
+
         expense_type = self.cleaned_data['expense_type']
         if expense_type is None:
             raise ValidationError('Please enter an expense type.')
         return expense_type
 
     def clean_name(self):
+        # Function to check if expense name is not populated
+
         name = self.cleaned_data['name']
         if name is None:
             raise ValidationError('Please enter a name.')
         return name
 
     def clean_org(self):
+        # Function to check if expense organization is not populated
+
         org = self.cleaned_data['org']
         if org is None:
             raise ValidationError('Please enter a org.')
         return org
 
     def clean_amount(self):
+        # Function to check if expense amount is not populated
+
         amount = self.cleaned_data['amount']
         if amount is None:
             raise ValidationError('Please enter a amount.')
         return amount
 
     def save(self, commit=True):
+        # Funtion to save expense form data
+
         expense = super(ExpenseForm, self).save(commit=False)
         expense.expense_date = self.cleaned_data['expense_date']
         expense.expense_type = self.cleaned_data['expense_type']
