@@ -80,3 +80,8 @@ class ExpenseForm(forms.ModelForm):
         if commit:
             expense.save()
             return expense
+
+
+class DateRangeForm(forms.Form):
+    start_date = forms.DateField()
+    end_date = forms.DateField()
