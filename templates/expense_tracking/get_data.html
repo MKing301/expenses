@@ -1,0 +1,77 @@
+{% extends 'expense_tracking/layout.html' %}
+{% load static %}
+{% block title %}Data{% endblock %}
+{%block body %}
+<div class="container">
+<main>
+    <legend class="border-bottom mb4">
+        Retrieve Data
+    </legend>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <p>
+              Select a start and end date to display your expenses within
+              the specified range.
+          </p>
+          <div class="row">
+            <div class="col-sm-3">
+              <label for="start_date">Start Date</label>
+              <input
+                  type="date"
+                  class="form-control form-control-sm"
+                  data-date-format="mm/dd/yyyy"
+                  id="start_date"
+                  name="start_date"
+                  required="false"
+              />
+            </div>
+            <div class="col-sm-3">
+              <label for="end_date">End Date</label>
+              <input
+                  type="date"
+                  class="form-control form-control-sm"
+                  data-date-format="mm/dd/yyyy"
+                  id="end_date"
+                  name="end_date"
+                  required="false"
+              />
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-2">
+                <button
+                  onclick="checkDates()"
+                  class="btn btn-sm btn-primary"
+                  type="submit"
+                >
+                  Load Data
+                </button>
+            </div>
+        </div>
+    </form>
+</main>
+</div>
+<script>
+        function checkDates(){
+                let start = document.getElementById("start_date").value;
+                let end = document.getElementById("end_date").value;
+                // One day in milliseconds
+                const oneDay = 1000 * 60 * 60 * 24;
+
+                //  Calculating the time difference between two dates
+                const diffInTime = new Date(end).getTime() - new Date(start).getTime();
+
+                // Calculating the no. of days between two dates
+                const diffInDays = Math.round(diffInTime / oneDay);
+
+                if(diffInDays < 0) {
+                  alert('The start date must be earlier than the end date.')
+                };
+
+                if(diffInDays > 366) {
+                  alert('The date range cannot be greater than 1 year.')
+                }
+        };
+    </script>
+{% endblock %}
