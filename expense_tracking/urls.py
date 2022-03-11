@@ -21,9 +21,9 @@ urlpatterns = [
     path('edit/<int:id>', views.edit_expense, name="edit_expense"),
     path("filter/<int:id>/", views.filter, name='filter'),
     path(
-        "data_2021/",
-        views.data_2021,
-        name='data_2021'
+        "get_data/",
+        views.get_data,
+        name='get_data'
     ),
     path(
         "delete_expense/<int:id>",
