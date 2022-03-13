@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class ExpenseType(models.Model):
@@ -24,6 +25,9 @@ class Expense(models.Model):
     org = models.CharField(max_length=200)
     amount = models.DecimalField(max_digits=7, decimal_places=2)
     notes = models.CharField(max_length=200, blank=True)
+    inserted_date = models.DateTimeField(
+        default=timezone.now
+    )
 
     def __str__(self):
         # String method returns expense name and date
