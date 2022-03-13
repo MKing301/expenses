@@ -5,7 +5,11 @@ import plotly.graph_objs as go
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from .models import Expense, ExpenseType
-from .forms import ExpenseForm, AuthenticationFormWithCaptchaField
+from .forms import (
+    ExpenseForm,
+    AuthenticationFormWithCaptchaField,
+    DateRangeForm
+)
 from django.contrib.auth import (
     login, logout, authenticate)
 from django.contrib import messages
@@ -20,7 +24,7 @@ from plotly.offline import plot
 
 
 # Set float values to 2 decimal places
-pd.options.display.float_format = "{:,.2f}".format
+pd.options.display.float_format = '{:,.2f}'.format
 
 
 class ExpenseTypeView(viewsets.ModelViewSet):
@@ -38,7 +42,7 @@ def index(request):
 
     return render(
         request=request,
-        template_name="expense_tracking/index.html",
+        template_name='expense_tracking/index.html',
     )
 
 
@@ -65,7 +69,7 @@ def login_request(request):
                     request,
                     f'{username} logged in successfully.'
                 )
-                return redirect("expense_tracking:expenses")
+                return redirect('expense_tracking:expenses')
 
             # Check if the users exist
             elif User.objects.filter(
@@ -78,24 +82,24 @@ def login_request(request):
                 if(user[0]['is_active'] is False):
                     messages.info(
                         request,
-                        "Contact the administrator to activate your account!"
+                        'Contact the administrator to activate your account!'
                     )
-                    return redirect("expense_tracking:login_request")
+                    return redirect('expense_tracking:login_request')
 
                 # Present form to the user with any errors
                 else:
                     return render(
                         request=request,
-                        template_name="expense_tracking/login.html",
-                        context={"form": form}
+                        template_name='expense_tracking/login.html',
+                        context={'form': form}
                     )
 
             # Present form to the user with any errors
             else:
                 return render(
                     request=request,
-                    template_name="expense_tracking/login.html",
-                    context={"form": form}
+                    template_name='expense_tracking/login.html',
+                    context={'form': form}
                 )
 
         # When the form is NOT being submitted, present to form to the user
@@ -103,8 +107,8 @@ def login_request(request):
             form = AuthenticationFormWithCaptchaField()
             return render(
                 request=request,
-                template_name="expense_tracking/login.html",
-                context={"form": form}
+                template_name='expense_tracking/login.html',
+                context={'form': form}
             )
 
     # If the user is already logged into the application, provide alert
@@ -117,7 +121,7 @@ def login_request(request):
         )
 
         # Redirect user to table of expense
-        return redirect("expense_tracking:expenses")
+        return redirect('expense_tracking:expenses')
 
 
 def password_reset_complete(request):
@@ -149,7 +153,7 @@ def expenses(request):
     # Render expense table list 50 expense per page with page navigation at
     # the bottom of the page
     return render(request=request,
-                  template_name="expense_tracking/expense.html",
+                  template_name='expense_tracking/expense.html',
                   context={
                       'my_expenses': my_expenses,
                       'distinct_expense_types': distinct_expense_types
@@ -165,7 +169,7 @@ def add_expense(request):
     expense_types = ExpenseType.objects.order_by('name')
 
     # When the form method is post
-    if request.method == "POST":
+    if request.method == 'POST':
 
         form = ExpenseForm(request.POST)
 
@@ -191,7 +195,7 @@ def add_expense(request):
             # and display an form field errors at the top of the page in red
             return render(
                 request=request,
-                template_name="expense_tracking/add_expense.html",
+                template_name='expense_tracking/add_expense.html',
                 context={
                     'form': form,
                     'expense_types': expense_types
@@ -228,7 +232,7 @@ def edit_expense(request, id):
     ).order_by('name')
 
     # When the form method is post
-    if request.method == "POST":
+    if request.method == 'POST':
         form = ExpenseForm(request.POST, instance=expense_to_edit)
 
         # Check if form is valid
@@ -289,7 +293,7 @@ def filter(request, id):
     # list with 50 expense per page with page navigation at the bottom of the
     # page
     return render(request=request,
-                  template_name="expense_tracking/expense.html",
+                  template_name='expense_tracking/expense.html',
                   context={
                       'my_expenses': my_expenses,
                       'distinct_expense_types': distinct_expense_types
@@ -328,76 +332,140 @@ def logout_request(request):
     log_user_logout()
 
     # Redirect to the landing page
-    return redirect("catalog:index")
+    return redirect('catalog:index')
 
 
 @login_required()
-def data_2021(request):
+def get_data(request):
 
-    # Create dataframe from all expense records for specified fields
-    df = pd.DataFrame(list(Expense.objects.all().values(
-        'expense_date', 'expense_type__name', 'name', 'org', 'amount')))
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = DateRangeForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
 
-    # Cast datetime to string
-    df["expense_date"] = pd.to_datetime(df["expense_date"], utc=True)
-    df["expense_date"] = df["expense_date"].dt.strftime('%Y')
+            start = form.cleaned_data['start_date']
+            end = form.cleaned_data['end_date']
 
-    # Convert amount column values to float
-    df["amount"] = pd.to_numeric(df["amount"], downcast="float")
+            # String format of dates for chart
+            start_str = start.strftime('%m-%d-%Y')
+            end_str = end.strftime('%m-%d-%Y')
 
-    # Select only records for the year 2011
-    df = df.loc[df["expense_date"] == '2021']
+            if ((end - start).days < 0 or (end - start).days > 366):
+                return render(
+                    request=request,
+                    template_name='expense_tracking/get_data.html',
+                    context={
+                        'form': form
+                    }
+                )
 
-    # Query for df grouped by expense type with sum of amounts for 2021
-    query_2021 = '''
-    SELECT "expense_type__name" AS "Expense Type", sum("amount") AS "Amount"
-    FROM df
-    WHERE "expense_date" = 2021
-    GROUP BY "Expense Type"
-    ORDER BY "Amount" DESC
-    '''
+            else:
+                # Create dataframe from all expense records for specified
+                # fields
+                df = pd.DataFrame(list(
+                    Expense.objects.all().values(
+                        'expense_date',
+                        'expense_type__name',
+                        'name',
+                        'org',
+                        'amount',
+                        'inserted_date'
+                    )
+                )
+                )
 
-    # Execute query
-    sum_2021 = ps.sqldf(query_2021, locals())
+                # Max date for df
+                max_date = df['inserted_date'].max()
 
-    trace = go.Bar(
-        x=sum_2021["Expense Type"],
-        y=sum_2021["Amount"]
-    )
+                # Convert amount column values to float
+                df['amount'] = pd.to_numeric(df['amount'], downcast='float')
 
-    layout = go.Layout(
-        title={
-            "text": "<b>2021 Expenses</b>",
-        },
-        title_x=.5,
-        xaxis={
-            "title": "<b>Expense Type</b>"
-        },
-        yaxis={
-            "title": "<b>Amount (in dollars)</b>"
-        }
-    )
-    fig = go.Figure(data=trace, layout=layout)
-    plt_div = plot(fig, output_type='div')
+                # Select sub-dataframe for date range fromform
+                mask = (
+                    df['expense_date'] >= start
+                ) & (
+                    df['expense_date'] <= end
+                )
 
-    # Set context to pass results table to template
-    dict = {
-        "sum_2021": build_table(sum_2021, 'blue_light'),
-        "plt_div": plt_div
-    }
+                # Query for df grouped by expense type with sum of amounts for
+                # between dates from form
+                grouped_df = df.loc[mask].groupby(
+                    'expense_type__name', as_index=False
+                ).sum()
 
-    # Display info alert for results with current timestamp
-    messages.info(
-        request,
-        f'''Here are the latest results as of
-        {timezone.localtime(timezone.now()).strftime(
-        "%m-%d-%Y %I:%M:%S %p %Z"
-        )}.'''
-    )
+                grouped_df.columns = ['Expense Type', 'Amount']
+
+                if len(grouped_df.index) == 0:
+                    return render(
+                        request=request,
+                        template_name='expense_tracking/results.html',
+                        context={
+                            'none': 'No records found for the specified range!',
+                            'start': start,
+                            'end': end
+                        }
+                    )
+                else:
+                    trace = go.Bar(
+                        x=grouped_df['Expense Type'],
+                        y=grouped_df['Amount']
+                    )
+
+                    layout = go.Layout(
+                        title={
+                            'text': f'<b>Expenses from {start_str} to {end_str}</b>',
+                        },
+                        title_x=.5,
+                        xaxis={
+                            'title': '<b>Expense Type</b>'
+                        },
+                        yaxis={
+                            'title': '<b>Amount (in dollars)</b>'
+                        }
+                    )
+                    fig = go.Figure(data=trace, layout=layout)
+                    plt_div = plot(fig, output_type='div')
+
+                    # Display info alert for results with current timestamp
+                    messages.info(
+                        request,
+                        f'''Here are the latest results as of
+                        {max_date.strftime(
+                        "%m-%d-%Y %I:%M:%S %p %Z"
+                        )}.'''
+                    )
+                    return render(
+                        request=request,
+                        template_name='expense_tracking/results.html',
+                        context={
+                            'grouped_df': build_table(
+                                grouped_df, 'blue_light'
+                            ),
+                            'plt_div': plt_div,
+                            'start': start,
+                            'end': end
+                        }
+                    )
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = DateRangeForm()
 
     # Render data visualization template for 2021 data
     return render(
         request=request,
-        template_name='expense_tracking/data_2021.html',
-        context=dict
+        template_name='expense_tracking/get_data.html',
+        context={
+            'form': form
+        }
+    )
+
+
+@ login_required
+def results(request):
+    return render(
+        request=request,
+        template_name='expense_tracking/results.html'
     )
