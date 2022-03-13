@@ -51,3 +51,7 @@ label {
 .pagination {
     justify-content:center;
 }
+
+.no_records{
+  color: red;
+}
