@@ -26,6 +26,11 @@ urlpatterns = [
         name='get_data'
     ),
     path(
+        "results/",
+        views.results,
+        name='results'
+    ),
+    path(
         "delete_expense/<int:id>",
         views.delete_expense,
         name='delete_expense'
