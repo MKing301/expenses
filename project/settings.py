@@ -48,7 +48,11 @@ INSTALLED_APPS = [
     'captcha',
     'rest_framework',
     'django_extensions',
+    'dbbackup',  # django-dbbackup,
 ]
+
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': '/home/mfsd1809/Dev/FullStackWebDeveloper/GitRepos/django-expenses/backup'}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
