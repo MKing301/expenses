@@ -1,7 +1,7 @@
 import pandas as pd
 import pandasql as ps
 import plotly.graph_objs as go
-
+import logging
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from .models import Expense, ExpenseType
@@ -26,6 +26,7 @@ from plotly.offline import plot
 # Set float values to 2 decimal places
 pd.options.display.float_format = '{:,.2f}'.format
 
+logger = logging.getLogger(__name__)
 
 class ExpenseTypeView(viewsets.ModelViewSet):
     # Class for expense type view set
