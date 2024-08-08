@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.77']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.159']
 
 
 # Application definition
@@ -87,9 +87,9 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'NAME': 'track_expense',
+        'USER': 'rdev2022',
+        'PASSWORD': 'iwant2blJ!noW',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
@@ -171,3 +171,33 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 MAIL_RECIPIENTS = os.environ.get('MAIL_RECIPIENTS')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '[%(asctime)s] - (%(levelname)-5.5s) - {%(name)-15.15s} - %(message)s'
+        },
+        'file': {
+            'format': '[%(asctime)s] - (%(levelname)s) - {%(name)s} - %(message)s'
+        }
+    },
+    "handlers": {
+        "file": {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'file',
+            'maxBytes': 1024*1024*150,
+            'backupCount': 5,
+            "filename": os.path.join(BASE_DIR, 'logs', 'expense.log'),
+        },
+    },
+    "loggers": {
+        "expense_tracking": {
+            "handlers": ["file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+}
