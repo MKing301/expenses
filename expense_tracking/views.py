@@ -31,7 +31,7 @@ class ExpenseTypeView(viewsets.ModelViewSet):
     # Class for expense type view set
 
     # Select all expense types
-    queryset = ExpenseType.objects.all()
+    queryset = ExpenseType.objects.all().order_by('name')
 
     # Serialize class
     serializer_class = ExpenseTypeSerializer
@@ -65,9 +65,10 @@ def login_request(request):
                 password = form.cleaned_data.get('password')
                 user = authenticate(username=username, password=password)
                 login(request, user)
+                login_msg = f'{username} logged in successfully.'
                 messages.success(
                     request,
-                    f'{username} logged in successfully.'
+                    login_msg
                 )
                 return redirect('expense_tracking:expenses')
 
@@ -148,7 +149,9 @@ def expenses(request):
     page = request.GET.get('page')
     my_expenses = p.get_page(page)
 
-    distinct_expense_types = ExpenseType.objects.all()
+    distinct_expense_types = ExpenseType.objects.all().order_by(
+            'name'
+            )
 
     # Render expense table list 50 expense per page with page navigation at
     # the bottom of the page
@@ -287,7 +290,7 @@ def filter(request, id):
     page = request.GET.get('page')
     my_expenses = p.get_page(page)
 
-    distinct_expense_types = ExpenseType.objects.all()
+    distinct_expense_types = ExpenseType.objects.all().order_by('name')
 
     # Render a dropdown list of expense types to filter by, the expense table
     # list with 50 expense per page with page navigation at the bottom of the
@@ -376,11 +379,13 @@ def get_data(request):
                 )
                 )
 
+
                 # Max date for df
                 max_date = df['inserted_date'].max()
 
                 # Convert amount column values to float
                 df['amount'] = pd.to_numeric(df['amount'], downcast='float')
+
 
                 # Select sub-dataframe for date range fromform
                 mask = (
@@ -391,9 +396,10 @@ def get_data(request):
 
                 # Query for df grouped by expense type with sum of amounts for
                 # between dates from form
-                grouped_df = df.loc[mask].groupby(
-                    'expense_type__name', as_index=False
-                ).sum()
+                filtered_df = df[mask]
+
+                # Using as_index=False set the index
+                grouped_df= filtered_df.groupby('expense_type__name', as_index=False)['amount'].sum()
 
                 grouped_df.columns = ['Expense Type', 'Amount']
 
