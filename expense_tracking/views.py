@@ -43,6 +43,50 @@ class ExpenseTypeView(viewsets.ModelViewSet):
     serializer_class = ExpenseTypeSerializer
 
 
+def get_chart(category, title):
+
+    df = category
+    trace1 = go.Bar(
+                x=df['Category'],
+                y=df['Budget Amount'],
+                name='Budget',
+                hovertemplate='%{y}',  # Display only the value on hover
+                #text=[f'{cat}: {val}' for cat, val in zip(budget['Category'], budget['Total Monthly Balance'])],
+                textposition='auto',
+                showlegend=True
+            )
+
+    trace2 = go.Bar(
+        x=df['Category'],
+        y=df['Monthly Expense Amount'],
+        name='Expense',
+        hovertemplate='%{y}',  # Display only the value on hover
+        # text=[f'{cat}: {val}' for cat, val in zip(budget['Category'], budget['Monthly Expense Amount'])],
+        textposition='auto',
+        showlegend=True
+    )
+
+    layout = go.Layout(
+        title={
+            'text': f'<b>{title} Monthly Budget</b>',
+        },
+        title_x=.5,
+        xaxis={
+            'title': '<b>Category</b>'
+        },
+        yaxis={
+            'title': '<b>Amount (in dollars)</b>'
+        },
+        barmode='group',
+        height=500,  # Set the height of the chart in pixels
+        plot_bgcolor='rgba(0, 0, 0, 0)',
+        paper_bgcolor='rgba(0, 0, 0, 0)',
+    )
+    fig = go.Figure(data=[trace1, trace2], layout=layout)
+    plt_div = plot(fig, output_type='div')
+    return plt_div
+
+
 def index(request):
     # Function renders landing page
 
@@ -435,7 +479,9 @@ def get_data(request):
                         },
                         yaxis={
                             'title': '<b>Amount (in dollars)</b>'
-                        }
+                        },
+                        plot_bgcolor='rgba(0, 0, 0, 0)',
+                        paper_bgcolor='rgba(0, 0, 0, 0)',
                     )
                     fig = go.Figure(data=trace, layout=layout)
                     plt_div = plot(fig, output_type='div')
@@ -570,6 +616,18 @@ def budget(request):
         df = pd.concat([budget, sum_row], ignore_index=True)
 
 
+        food = budget[budget['Category'] == 'Food']
+        gas = budget[budget['Category'] == 'Transportation-Gas']
+        aquasana = budget[budget['Category'] == 'Aquasana']
+        clothing = budget[budget['Category'] == 'Clothing']
+        salon = budget[budget['Category'] == 'Salon']
+        cleaning = budget[budget['Category'] == 'Dry Cleaning']
+        toll = budget[budget['Category'] == 'Transportation-Toll']
+        lawn = budget[budget['Category'] == 'Lawn Care']
+        personal_care = budget[budget['Category'] == 'Personal Care Items']
+        gifts = budget[budget['Category'] == 'Gifts']
+        household = budget[budget['Category'] == 'Household Supplies']
+
         if len(budget.index) == 0:
                         return render(
                             request=request,
@@ -581,42 +639,24 @@ def budget(request):
                             }
                         )
         else:
-            trace1 = go.Bar(
-                x=budget['Category'],
-                y=budget['Budget Amount'],
-                name='Budget',
-                hovertemplate='%{y}',  # Display only the value on hover
-                #text=[f'{cat}: {val}' for cat, val in zip(budget['Category'], budget['Total Monthly Balance'])],
-                textposition='auto',
-                showlegend=True
-            )
+            food_chart =get_chart(food, 'Food')
+            gas_chart = get_chart(gas, 'Gas')
+            aquasana_chart = get_chart(aquasana, 'Aquasana')
+            clothing_chart = get_chart(clothing, 'Clothing')
+            salon_chart = get_chart(salon, 'Salon')
+            cleaning_chart = get_chart(cleaning, 'Cleaning')
+            toll_chart = get_chart(toll, 'Toll')
+            lawn_chart = get_chart(lawn, 'Lawn')
+            personal_care_chart = get_chart(personal_care, 'Personal')
+            gifts_chart = get_chart(gifts, 'Gifts')
+            household_chart = get_chart(household, 'Household')
 
-            trace2 = go.Bar(
-                x=budget['Category'],
-                y=budget['Monthly Expense Amount'],
-                name='Expense',
-                hovertemplate='%{y}',  # Display only the value on hover
-                # text=[f'{cat}: {val}' for cat, val in zip(budget['Category'], budget['Monthly Expense Amount'])],
-                textposition='auto',
-                showlegend=True
-            )
-
-            layout = go.Layout(
-                title={
-                    'text': f'<b>{current_month_display_name} {current_year} Monthly Budget</b>',
-                },
-                title_x=.5,
-                xaxis={
-                    'title': '<b>Category</b>'
-                },
-                yaxis={
-                    'title': '<b>Amount (in dollars)</b>'
-                },
-                barmode='group',
-                height=650  # Set the height of the chart in pixels
-            )
-            fig = go.Figure(data=[trace1, trace2], layout=layout)
-            plt_div = plot(fig, output_type='div')
+            charts = [
+                food_chart, gas_chart, aquasana_chart,
+                clothing_chart, salon_chart, cleaning_chart,
+                toll_chart, lawn_chart, personal_care_chart,
+                gifts_chart, household_chart
+            ]
             return render(
                 request=request,
                 template_name='expense_tracking/budget.html',
@@ -626,7 +666,7 @@ def budget(request):
                     'budget': build_table(
                                         df, 'blue_light'
                                     ),
-                    'plt_div': plt_div
+                    'charts': charts
                 }
             )
 
