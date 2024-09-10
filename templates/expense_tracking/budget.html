@@ -11,9 +11,19 @@
             <p class="no_records">{{none}}</p>
         {% else %}
             {{ budget|safe }}
-            {% autoescape off %}
-            {{ plt_div }}
-            {% endautoescape %}
+            <div class="row">
+                {% for chart in charts %}
+                <div class="col-sm-4">
+                  <div class="card">
+                    <div class="card-body">
+                        {% autoescape off %}
+                            {{ chart }}
+                        {% endautoescape %}
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
         {% endif %}
 </main>
 </div>
