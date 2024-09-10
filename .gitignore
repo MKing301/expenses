@@ -91,4 +91,4 @@ venv/
 env/
 .env
 
-settings.js
+settings.json
