@@ -12,11 +12,11 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import os
 
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 from pathlib import Path
 from django.contrib.messages import constants as messages
 
-load_dotenv()
+config = dotenv_values()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,12 +26,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = config['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.159']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.159', '192.168.1.77']
 
 
 # Application definition
@@ -91,9 +91,9 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'track_expense',
-        'USER': 'rdev2022',
-        'PASSWORD': 'iwant2blJ!noW',
+        'NAME': config['DB_NAME'],
+        'USER': config['DB_USER'],
+        'PASSWORD': config['DB_USER_PASSWORD'],
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
@@ -154,8 +154,8 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger'
 }
 
-RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY')
-RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY')
+RECAPTCHA_PUBLIC_KEY = config['RECAPTCHA_PUBLIC_KEY']
+RECAPTCHA_PRIVATE_KEY = config['RECAPTCHA_PRIVATE_KEY']
 
 LOGOUT_REDIRECT_URL = '/'
 
@@ -167,14 +167,14 @@ REST_FRAMEWORK = {
 
 # SMTP Configuration
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER')
-SERVER_EMAIL = os.environ.get('EMAIL_HOST_USER')
+DEFAULT_FROM_EMAIL = config['EMAIL_HOST_USER']
+SERVER_EMAIL = config['EMAIL_HOST_USER']
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = '587'
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-MAIL_RECIPIENTS = os.environ.get('MAIL_RECIPIENTS')
+EMAIL_HOST_USER = config['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = config['EMAIL_HOST_PASSWORD']
+MAIL_RECIPIENTS = config['MAIL_RECIPIENTS']
 
 LOGGING = {
     'version': 1,
