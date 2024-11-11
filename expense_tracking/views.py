@@ -1,10 +1,14 @@
+from locale import currency
 import pandas as pd
 import pandasql as ps
+import numpy as np
 import plotly.graph_objs as go
+import logging
+
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from .models import Expense, ExpenseType
+from .models import Expense, ExpenseType, Budget
 from .forms import (
     ExpenseForm,
     AuthenticationFormWithCaptchaField,
@@ -25,16 +29,62 @@ from plotly.offline import plot
 
 # Set float values to 2 decimal places
 pd.options.display.float_format = '{:,.2f}'.format
+pd.set_option('future.no_silent_downcasting', True)
 
+logger = logging.getLogger(__name__)
 
 class ExpenseTypeView(viewsets.ModelViewSet):
     # Class for expense type view set
 
     # Select all expense types
-    queryset = ExpenseType.objects.all()
+    queryset = ExpenseType.objects.all().order_by('name')
 
     # Serialize class
     serializer_class = ExpenseTypeSerializer
+
+
+def get_chart(category, title):
+
+    df = category
+    trace1 = go.Bar(
+                x=df['Category'],
+                y=df['Budget Amount'],
+                name='Budget',
+                hovertemplate='%{y}',  # Display only the value on hover
+                #text=[f'{cat}: {val}' for cat, val in zip(budget['Category'], budget['Total Monthly Balance'])],
+                textposition='auto',
+                showlegend=True
+            )
+
+    trace2 = go.Bar(
+        x=df['Category'],
+        y=df['Monthly Expense Amount'],
+        name='Expense',
+        hovertemplate='%{y}',  # Display only the value on hover
+        # text=[f'{cat}: {val}' for cat, val in zip(budget['Category'], budget['Monthly Expense Amount'])],
+        textposition='auto',
+        showlegend=True
+    )
+
+    layout = go.Layout(
+        title={
+            'text': f'<b>{title} Monthly Budget</b>',
+        },
+        title_x=.5,
+        xaxis={
+            'title': '<b>Category</b>'
+        },
+        yaxis={
+            'title': '<b>Amount (in dollars)</b>'
+        },
+        barmode='group',
+        height=500,  # Set the height of the chart in pixels
+        plot_bgcolor='rgba(0, 0, 0, 0)',
+        paper_bgcolor='rgba(0, 0, 0, 0)',
+    )
+    fig = go.Figure(data=[trace1, trace2], layout=layout)
+    plt_div = plot(fig, output_type='div')
+    return plt_div
 
 
 def index(request):
@@ -65,9 +115,10 @@ def login_request(request):
                 password = form.cleaned_data.get('password')
                 user = authenticate(username=username, password=password)
                 login(request, user)
+                login_msg = f'{username} logged in successfully.'
                 messages.success(
                     request,
-                    f'{username} logged in successfully.'
+                    login_msg
                 )
                 return redirect('expense_tracking:expenses')
 
@@ -289,7 +340,7 @@ def filter(request, id):
     page = request.GET.get('page')
     my_expenses = p.get_page(page)
 
-    distinct_expense_types = ExpenseType.objects.all()
+    distinct_expense_types = ExpenseType.objects.all().order_by('name')
 
     # Render a dropdown list of expense types to filter by, the expense table
     # list with 50 expense per page with page navigation at the bottom of the
@@ -331,7 +382,7 @@ def logout_request(request):
     logout(request)
 
     # Log user out; display alert from log user out signal
-    log_user_logout()
+    # log_user_logout()
 
     # Redirect to the landing page
     return redirect('catalog:index')
@@ -378,11 +429,13 @@ def get_data(request):
                 )
                 )
 
+
                 # Max date for df
                 max_date = df['inserted_date'].max()
 
                 # Convert amount column values to float
                 df['amount'] = pd.to_numeric(df['amount'], downcast='float')
+
 
                 # Select sub-dataframe for date range fromform
                 mask = (
@@ -393,9 +446,10 @@ def get_data(request):
 
                 # Query for df grouped by expense type with sum of amounts for
                 # between dates from form
-                grouped_df = df.loc[mask].groupby(
-                    'expense_type__name', as_index=False
-                ).sum()
+                filtered_df = df[mask]
+
+                # Using as_index=False set the index
+                grouped_df= filtered_df.groupby('expense_type__name', as_index=False)['amount'].sum()
 
                 grouped_df.columns = ['Expense Type', 'Amount']
 
@@ -425,7 +479,9 @@ def get_data(request):
                         },
                         yaxis={
                             'title': '<b>Amount (in dollars)</b>'
-                        }
+                        },
+                        plot_bgcolor='rgba(0, 0, 0, 0)',
+                        paper_bgcolor='rgba(0, 0, 0, 0)',
                     )
                     fig = go.Figure(data=trace, layout=layout)
                     plt_div = plot(fig, output_type='div')
@@ -463,6 +519,157 @@ def get_data(request):
             'form': form
         }
     )
+
+
+@ login_required
+def budget(request):
+
+    current = timezone.now()
+    current_month_display_name = current.strftime('%b')
+    current_month = current.month
+    current_year = current.year
+
+
+    df = pd.DataFrame(list(
+                    Expense.objects.all().values(
+                        'expense_date',
+                        'expense_type__name',
+                        'name',
+                        'org',
+                        'amount',
+                        'inserted_date'
+                    ).filter(
+                        expense_date__year=current_year,
+                        expense_date__month=current_month
+                        )
+                    )
+                )
+
+    if len(df.index) == 0:
+        return render(
+                        request=request,
+                        template_name='expense_tracking/budget.html',
+                        context={
+                            'none': 'No expense records found for this month!',
+                        }
+                    )
+
+    else:
+        # Using as_index=False set the index
+        tracking= df.groupby('expense_type__name', as_index=False)['amount'].sum()
+
+        tracking.columns = ['Expense Type', 'Amount']
+
+        budget =  pd.DataFrame(list(
+                        Budget.objects.all().values(
+                            'name',
+                            'beginning_bal',
+                            'budget_amt',
+                            'total_monthly_bal',
+                            'expense_amt',
+                            'current_bal'
+                        )))
+
+        budget['beginning_bal'] = budget['beginning_bal'].astype(float)
+        budget['budget_amt'] = budget['budget_amt'].astype(float)
+        budget['total_monthly_bal'] = budget['beginning_bal'] + budget['budget_amt']
+
+        # Merge budget and tracking DataFrames on the matching columns
+        merged = pd.merge(budget, tracking, left_on='name', right_on='Expense Type', how='left', suffixes=('', '_tracking'))
+
+
+        # Update the amount column in budget DataFrame with values from tracking DataFrame
+        budget['expense_amt'] = merged['Amount'].combine_first(merged['expense_amt']).astype(float)
+
+        # Replace None with 0
+        budget = budget.fillna(0)
+
+        budget['rounded_expense_amt'] = np.ceil(budget['expense_amt'].astype(float))
+        budget['current_bal'] = budget['total_monthly_bal'].astype(float) - budget['expense_amt'].astype(float)
+
+        # Rename columns
+        budget.columns = ['Category', 'Beginning Balance', 'Budget Amount', 'Total Monthly Balance', 'Monthly Expense Amount', 'Current Monthly Balance', 'Rounded Monthly Expense Amount']
+
+        # Re-order colums
+        budget = budget[['Category', 'Beginning Balance', 'Budget Amount', 'Total Monthly Balance', 'Monthly Expense Amount', 'Rounded Monthly Expense Amount', 'Current Monthly Balance']]
+
+        sorted_budget = budget.sort_values(by=['Category'])
+        # Convert dataframe to dictionary
+        budget_dict = sorted_budget.to_dict(orient='records')
+
+
+        for data in budget_dict:
+            Budget.objects.filter(name=data['Category']).update(
+                beginning_bal=data['Beginning Balance'],
+                total_monthly_bal=data['Total Monthly Balance'],
+                expense_amt=data['Monthly Expense Amount'],
+                current_bal=data['Current Monthly Balance']
+            )
+
+        # Calculate the sum of numeric columns
+        numeric_sum = sorted_budget.select_dtypes(include='number').sum()
+
+        # Convert the numeric sums to a DataFrame with the same columns
+        sum_row = pd.DataFrame(numeric_sum).transpose()
+        sum_row['Category'] = 'Totals'
+
+
+        # Append the sum row to the original DataFrame
+        df = pd.concat([sorted_budget, sum_row], ignore_index=True)
+
+
+        food = budget[budget['Category'] == 'Food']
+        gas = budget[budget['Category'] == 'Transportation-Gas']
+        aquasana = budget[budget['Category'] == 'Aquasana']
+        clothing = budget[budget['Category'] == 'Clothing']
+        salon = budget[budget['Category'] == 'Salon']
+        cleaning = budget[budget['Category'] == 'Dry Cleaning']
+        toll = budget[budget['Category'] == 'Transportation-Toll']
+        lawn = budget[budget['Category'] == 'Lawn Care']
+        personal_care = budget[budget['Category'] == 'Personal Care Items']
+        gifts = budget[budget['Category'] == 'Gifts']
+        household = budget[budget['Category'] == 'Household Supplies']
+
+        if len(budget.index) == 0:
+                        return render(
+                            request=request,
+                            template_name='expense_tracking/budget.html',
+                            context={
+                                'current_month_display_name': current_month_display_name,
+                                'current_year': current_year,
+                                'none': 'No records found!',
+                            }
+                        )
+        else:
+            food_chart =get_chart(food, 'Food')
+            gas_chart = get_chart(gas, 'Gas')
+            aquasana_chart = get_chart(aquasana, 'Aquasana')
+            clothing_chart = get_chart(clothing, 'Clothing')
+            salon_chart = get_chart(salon, 'Salon')
+            cleaning_chart = get_chart(cleaning, 'Cleaning')
+            toll_chart = get_chart(toll, 'Toll')
+            lawn_chart = get_chart(lawn, 'Lawn')
+            personal_care_chart = get_chart(personal_care, 'Personal')
+            gifts_chart = get_chart(gifts, 'Gifts')
+            household_chart = get_chart(household, 'Household')
+
+            charts = [
+                aquasana_chart, clothing_chart, cleaning_chart, food_chart,
+                gifts_chart, household_chart, lawn_chart, personal_care_chart,
+                salon_chart, gas_chart, toll_chart
+            ]
+            return render(
+                request=request,
+                template_name='expense_tracking/budget.html',
+                context={
+                    'current_month_display_name': current_month_display_name,
+                    'current_year': current_year,
+                    'budget': build_table(
+                                        df, 'blue_light'
+                                    ),
+                    'charts': charts
+                }
+            )
 
 
 @ login_required

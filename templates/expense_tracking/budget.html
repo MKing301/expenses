@@ -1,0 +1,30 @@
+{% extends 'expense_tracking/layout.html' %}
+{% load static %}
+{% block title %}Monthly Budget{% endblock %}
+{%block body %}
+<div class="container">
+<main>
+    <legend class="border-bottom mb4">
+        {{current_month_display_name}} {{current_year}} Budget
+    </legend>
+        {% if none %}
+            <p class="no_records">{{none}}</p>
+        {% else %}
+            {{ budget|safe }}
+            <div class="row">
+                {% for chart in charts %}
+                <div class="col-sm-4">
+                  <div class="card">
+                    <div class="card-body">
+                        {% autoescape off %}
+                            {{ chart }}
+                        {% endautoescape %}
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+        {% endif %}
+</main>
+</div>
+{% endblock %}
