@@ -8,8 +8,8 @@ from captcha.fields import ReCaptchaField
 class AuthenticationFormWithCaptchaField(AuthenticationForm):
     # Class for authentication form, includingg recaptcha field
     captcha = ReCaptchaField(
-        public_key='your public key here',
-        private_key='your private key here',
+        public_key='6Le6CNkdAAAAAM0erjmCJJ_YW_tnVDhfFmvYHEQX',
+        private_key='6Le6CNkdAAAAAKUVozivgonzS4yEnlfH8Ai0Ck2Y',
     )
 
 
