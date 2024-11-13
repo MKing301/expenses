@@ -17,7 +17,6 @@ app_name = "expense_tracking"
 urlpatterns = [
     path('', views.index, name="index"),
     path('expenses', views.expenses, name="expenses"),
-    path('budget', views.budget, name="budget"),
     path('add/', views.add_expense, name="add_expense"),
     path('edit/<int:id>', views.edit_expense, name="edit_expense"),
     path("filter/<int:id>/", views.filter, name='filter'),
